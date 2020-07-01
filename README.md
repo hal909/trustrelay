@@ -31,19 +31,29 @@ Protection for TrueReward users against vulnerabilities and risk in financial op
 
 TrueUSD is a compliant stablecoin backed 1:1 by US Dollars. TrueUSD is minted in exchange for US dollar transfers (currently through wire transfer) and redeemed for US dollars (also via wire transfer). TrueUSD is partnered with Armanino to provide real time attestations for USD balances backing TrueUSD.
 
+### TokenController
+
+The TokenController contract is used to manage TrueUSD, separating roles by permission.
+
 ### Mints
 
 ### Redemptions
 
-### depositBackedSupply
+### Supply
 
-As explained in the TrueReward section
+There are multiple functions to get the supply of TrueUSD. The three functions are:
+
+- **depositBackedSupply()** - supply of TUSD backed by US Dollars
+- **rewardBackedSupply()** - supply of TUSD backed by TrueReward
+- **totalSupply()** - supply of TUSD backed by TrueReward and US Dollars
+
+Only deposit-backed TrueUSD can ever be exchanged for US Dollars. Please read the TrueReward section to learn more about the difference between reward-backed TUSD and deposit-backed TUSD.
 
 # TrueReward
 
 TrueReward allows TUSD holders to earn rewards by loaning TUSD to financial opportunities in return for block-by block rewards. Accounts can enable TrueReward directly from an Ethereum wallet and are able to view their total balance update block-by block.
 
-TrueReward adds an ad
+Accounts opted into TrueReward can NEVER exchange their balances for US Dollars. Rather, an account MUST opt out before making a redemption.
 
 ### Enabling and Disabling TrueReward
 
@@ -73,7 +83,13 @@ This way, rewardTokens can never be transferred directly, rather they are always
 
 ### Reserve Mechanism
 
-Interacting with defi smart contracts can become very expensive. Therefore, a gas saving mechanism was implemented to allow cheap enables, disables, and transfers with TrueReward enabled accounts. 
+Interacting with defi smart contracts can become very expensive. Therefore, a gas saving mechanism was implemented to allow cheap opt-ins, opt-outs, and transfers for TrueReward enabled accounts. This mechanism is part of the TrueUSD smart contract, and is intended to facilitate low gas transfers, opt-ins, and opt-outs.
+
+#### How the Reserve Works
+
+The RESERVE address is a special address which nobody holds the private key to. Rather than using transfer(), the TrueUSD contract simply updates the balance of the reserve TUSD and rToken balances. The rToken balances of this contract are managed by the TokenController contract
+
+The reserve works by using a RESERVE address can holds balances of both rewardTokens and TrueUSD. This is a unique address which is managed internally by TrustToken to keep transfers cheap by sponsoring internal contract swaps between rewardToken and TUSD balances. There must always be enough liquidity in the reserve to sponsor swaps, otherwise rTokens must directly call the financial opportunity to exchange rTokens and TUSD.
 
 ## Financial Opportunity
 
@@ -138,10 +154,10 @@ TrustToken Assurance is a system to protect TrueReward users from vulnerabilitie
 
 TrustToken (TRU) is a standard ERC-20 token used to stake on financial opportunities. TrustTokens have a total supply of 1.45 billion TRU.
 
-[TODO: insert TrustToken distribution details]
-
 ## StakedToken Contract
 
 StakedToken is the name of the staking pool contract
 
 ## Liquidator Contract
+
+The Liquidator sells TRU for TUSD when a financial opportunity becomes insolvent.
